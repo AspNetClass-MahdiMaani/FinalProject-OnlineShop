@@ -1,6 +1,6 @@
 ﻿using Azure;
 using OnlineShop.Frameworks.ResponseFrameworks.Contracts;
-using OnlineShop.Models.DomainModels.PersonAggregates;
+using OnlineShop.Models.DomainModels.ProductAggregates;
 
 namespace OnlineShop.Models.Services.Contracts
 {
@@ -9,9 +9,9 @@ namespace OnlineShop.Models.Services.Contracts
         Task<IResponse<T>> InsertAsync(T obj);
         Task<IResponse<T>> UpdateAsync(T obj);
         Task<IResponse<T>> DeleteAsync(T obj);
-        Task<IResponse<T>> DeleteAsync(Guid Id);
+        Task<IResponse<T>> DeleteAsync(Guid id);
         Task<IResponse<List<T>>> Select(T obj);
-        Task<IResponse<Product>> FindByIdAsync(Guid id);
+        Task<IResponse<T>> FindByIdAsync(Guid id);
         Task SaveChanges();
     }
 }

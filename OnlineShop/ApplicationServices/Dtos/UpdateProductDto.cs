@@ -1,6 +1,6 @@
-﻿namespace OnlineShop.Models.DomainModels.PersonAggregates
+﻿namespace OnlineShop.ApplicationServices.Dtos
 {
-    public class Product
+    public class UpdateProductDto
     {
         public Guid Id { get; set; }
         public string? Title { get; set; }

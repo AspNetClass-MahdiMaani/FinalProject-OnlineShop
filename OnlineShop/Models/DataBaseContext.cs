@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OnlineShop.Models.DomainModels.PersonAggregates;
+using OnlineShop.Models.DomainModels.ProductAggregates;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 

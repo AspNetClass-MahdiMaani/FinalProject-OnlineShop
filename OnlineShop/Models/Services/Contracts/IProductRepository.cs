@@ -1,5 +1,5 @@
 ﻿using OnlineShop.Frameworks.ResponseFrameworks.Contracts;
-using OnlineShop.Models.DomainModels.PersonAggregates;
+using OnlineShop.Models.DomainModels.ProductAggregates;
 
 namespace OnlineShop.Models.Services.Contracts
 {
