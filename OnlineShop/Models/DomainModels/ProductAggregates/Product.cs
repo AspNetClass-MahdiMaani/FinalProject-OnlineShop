@@ -1,6 +1,8 @@
-﻿namespace OnlineShop.Models.DomainModels.ProductAggregates
+﻿using OnlineShop.Frameworks;
+
+namespace OnlineShop.Models.DomainModels.ProductAggregates
 {
-    public class Product
+    public class Product: IDbSetEntity
     {
         public Guid Id { get; set; }
         public string? Title { get; set; }

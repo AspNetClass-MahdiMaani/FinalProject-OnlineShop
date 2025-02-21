@@ -1,4 +1,4 @@
-﻿namespace OnlineShop.ApplicationServices.Dtos
+﻿namespace OnlineShop.ApplicationServices.Dtos.ProductDtos
 {
     public class DeleteProductDto
     {

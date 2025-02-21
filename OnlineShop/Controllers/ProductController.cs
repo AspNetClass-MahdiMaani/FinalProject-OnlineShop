@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OnlineShop.ApplicationServices.Dtos;
+using OnlineShop.ApplicationServices.Dtos.ProductDtos;
 using OnlineShop.Models.DomainModels.ProductAggregates;
 using OnlineShop.Models.Services.Contracts;
 
@@ -11,31 +11,39 @@ namespace OnlineShop.Controllers
         private readonly ILogger<ProductController> _logger;
 
         #region [- Ctor -]
-
         public ProductController(IProductRepository productRepository, ILogger<ProductController> logger)
         {
             _productRepository = productRepository;
             _logger = logger;
         }
-
         #endregion
 
         #region [- Get() -]
 
         [HttpGet(Name = "GetProducts")]
-        public async Task<IActionResult> Get(Product obj)
+        public async Task<IActionResult> Get(GetProductDto getProductDto)
         {
-            var products =await _productRepository.Select(obj);
-            return new JsonResult(products);
+            if (getProductDto != null)
+            {
+                var getProduct = new Product()
+                {
+                    Id=getProductDto.Id,
+                    Title=getProductDto.Title,
+                    UnitPrice=getProductDto.UnitPrice,
+                    Description=getProductDto.Description,
+                };
+                await _productRepository.Select(getProduct);
+            }
+            return Ok();
         }
 
         #endregion
 
         #region [- Post() -]
-        [HttpPost(Name ="PostProduct")]
+        [HttpPost(Name = "PostProduct")]
         public async Task<IActionResult> Post(InsertProductDto insertProductDto)
         {
-            if (insertProductDto!=null)
+            if (insertProductDto != null)
             {
                 var product = new Product()
                 {
@@ -72,10 +80,10 @@ namespace OnlineShop.Controllers
 
         #region [- Delete() -]
 
-        [HttpDelete(Name ="DeleteProduct")]
+        [HttpDelete(Name = "DeleteProduct")]
         public async Task<IActionResult> Delete(DeleteProductDto deleteProductDto)
         {
-            if (deleteProductDto!=null)
+            if (deleteProductDto != null)
             {
                 await _productRepository.DeleteAsync(deleteProductDto.Id);
             }

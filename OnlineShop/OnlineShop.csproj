@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ApplicationServices\Contracts\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Frameworks\ResponseMessages.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
