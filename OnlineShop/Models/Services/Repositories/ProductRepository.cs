@@ -11,11 +11,11 @@ namespace OnlineShop.Models.Services.Repositories
 {
     public class ProductRepository : IProductRepository
     {
-        private readonly DataBaseContext _context;
+        private readonly FinalProjectDbContext _context;
 
         #region [-Ctor-]
 
-        public ProductRepository(DataBaseContext context)
+        public ProductRepository(FinalProjectDbContext context)
         {
             _context = context;
         }
@@ -113,7 +113,7 @@ namespace OnlineShop.Models.Services.Repositories
 
         #region [- Select(Product obj)-]
 
-        public async Task<IResponse<List<Product>>> Select(Product obj)
+        public async Task<IResponse<List<Product>>> Select()
         {
             try
             {

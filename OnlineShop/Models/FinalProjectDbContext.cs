@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OnlineShop.Frameworks;
+using OnlineShop.Models.DomainModels.personAggregates;
 using OnlineShop.Models.DomainModels.ProductAggregates;
 using System.Collections.Generic;
 using System.Reflection;
@@ -7,9 +8,9 @@ using System.Reflection.Emit;
 
 namespace OnlineShop.Models
 {
-    public class DataBaseContext : DbContext
+    public class FinalProjectDbContext : DbContext
     {
-        public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options)
+        public FinalProjectDbContext(DbContextOptions<FinalProjectDbContext> options) : base(options)
         {
 
         }
@@ -31,5 +32,6 @@ namespace OnlineShop.Models
         #endregion
 
         public DbSet<Product> Product { get; set; }
+        public DbSet<Person> Person { get; set; }
     }
 }

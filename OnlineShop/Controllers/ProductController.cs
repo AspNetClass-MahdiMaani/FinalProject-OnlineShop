@@ -5,36 +5,26 @@ using OnlineShop.Models.Services.Contracts;
 
 namespace OnlineShop.Controllers
 {
-    public class ProductController : Controller
+    [Route("[controller]")]
+    [ApiController]
+    public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
-        private readonly ILogger<ProductController> _logger;
 
         #region [- Ctor -]
-        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger)
+        public ProductController(IProductRepository productRepository)
         {
             _productRepository = productRepository;
-            _logger = logger;
         }
         #endregion
 
         #region [- Get() -]
 
         [HttpGet(Name = "GetProducts")]
-        public async Task<IActionResult> Get(GetProductDto getProductDto)
+        public async Task<IActionResult> Get()
         {
-            if (getProductDto != null)
-            {
-                var getProduct = new Product()
-                {
-                    Id=getProductDto.Id,
-                    Title=getProductDto.Title,
-                    UnitPrice=getProductDto.UnitPrice,
-                    Description=getProductDto.Description,
-                };
-                await _productRepository.Select(getProduct);
-            }
-            return Ok();
+            var products = _productRepository.Select().Result;
+            return new JsonResult(products);
         }
 
         #endregion
