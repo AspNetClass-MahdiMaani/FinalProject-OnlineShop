@@ -8,13 +8,19 @@ namespace OnlineShop.Models.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderDetail> builder)
         {
-            builder.ToTable("OrderDetail", "AppOrder");
-            builder.HasKey(od => new
-            {
-                od.OrderHeaderId,
-                od.ProductId,
-            });
+            builder.HasKey(od => new {od.OrderHeaderId,od.ProductId});
+            builder.Property(od => od.UnitPrice).IsRequired();
+            builder.Property(od => od.Amount).IsRequired();
 
+            builder.HasOne(oh => oh.OrderHeader)
+                   .WithMany(od => od.OrderDetail)
+                   .HasForeignKey(oh => oh.OrderHeaderId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(od => od.Product)
+                   .WithMany(p => p.OrderDetail)
+                   .HasForeignKey(od => od.ProductId)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

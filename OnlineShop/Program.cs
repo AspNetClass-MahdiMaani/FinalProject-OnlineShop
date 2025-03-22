@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using OnlineShop.ApplicationServices.Contracts;
+using OnlineShop.ApplicationServices.Services;
 using OnlineShop.Models;
 using OnlineShop.Models.Services.Contracts;
 using OnlineShop.Models.Services.Repositories;
@@ -13,6 +15,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IProductRepository,ProductRepository>();
 builder.Services.AddScoped<IPersonRepository,PersonRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<FinalProjectDbContext>();
+
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 #region [- Connectionstring() -]
 
@@ -45,12 +53,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineShop");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "OnlineShop v1");
     });
 }
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-app.MapGet("/", () => "Hello World!");
 app.Run();

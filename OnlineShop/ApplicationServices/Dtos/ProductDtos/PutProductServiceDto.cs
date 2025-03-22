@@ -1,6 +1,6 @@
 ﻿namespace OnlineShop.ApplicationServices.Dtos.ProductDtos
 {
-    public class UpdateProductDto
+    public class PutProductServiceDto
     {
         public Guid Id { get; set; }
         public string? Title { get; set; }

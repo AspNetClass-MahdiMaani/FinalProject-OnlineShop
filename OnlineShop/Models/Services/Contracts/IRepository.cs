@@ -6,12 +6,12 @@ namespace OnlineShop.Models.Services.Contracts
 {
     public interface IRepository<T, TCollection>
     {
+        Task<IResponse<TCollection>> SelectAll();
         Task<IResponse<T>> InsertAsync(T obj);
         Task<IResponse<T>> UpdateAsync(T obj);
         Task<IResponse<T>> DeleteAsync(T obj);
-        Task<IResponse<T>> DeleteAsync(Guid id);
-        Task<IResponse<List<T>>> Select();
-        Task<IResponse<T>> FindByIdAsync(Guid id);
+        //Task<IResponse<T>> DeleteAsync(Guid id);
+        Task<IResponse<T>> Select(T obj);
         Task SaveChanges();
     }
 }

@@ -8,6 +8,6 @@ namespace OnlineShop.Models.DomainModels.OrderAggregates
         public Guid Id { get; set; }
         public Person Seller { get; set; }
         public Person Buyer { get; set; }
-        public List<OrderDetail>? OrderDetails { get; set; }
+        public List<OrderDetail>? OrderDetail { get; set; }
     }
 }

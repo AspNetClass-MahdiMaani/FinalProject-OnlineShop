@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OnlineShop.ApplicationServices.Dtos.PersonDtos
 {
-    public class UpdatePersonDto
+    public class PutPersonServiceDto
     {
         public Guid Id { get; set; }
         public string FName { get; set; }

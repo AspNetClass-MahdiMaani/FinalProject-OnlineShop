@@ -3,6 +3,7 @@ using OnlineShop.Frameworks;
 using OnlineShop.Frameworks.ResponseFrameworks;
 using OnlineShop.Frameworks.ResponseFrameworks.Contracts;
 using OnlineShop.Models.DomainModels.personAggregates;
+using OnlineShop.Models.DomainModels.ProductAggregates;
 using OnlineShop.Models.Services.Contracts;
 using System.Net;
 
@@ -25,51 +26,16 @@ namespace OnlineShop.Models.Services.Repositories
         {
             try
             {
-                if (_context.Entry(obj).State == EntityState.Detached)
+                var existingPerson = await _context.Person.FindAsync(obj.Id);
+                if (existingPerson == null)
                 {
-                    _context.Person.Attach(obj);
+                    return new Response<Person>(false, HttpStatusCode.NotFound, ResponseMessages.NullInput, null);
                 }
-                _context.Remove(obj);
+
+                _context.Entry(existingPerson).State = EntityState.Detached;
+                _context.Person.Remove(existingPerson);
                 await SaveChanges();
                 return new Response<Person>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, obj);
-            }
-            catch (Exception)
-            {
-
-                return new Response<Person>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
-            }
-        }
-
-        #endregion
-
-        #region [- DeleteAsync(Guid id) - ]
-
-        public async Task<IResponse<Person>> DeleteAsync(Guid id)
-        {
-            try
-            {
-                var entityToDelete = _context.Person.Find(id);
-                _context.Remove(entityToDelete);
-                await SaveChanges();
-                return new Response<Person>(true, HttpStatusCode.Accepted, ResponseMessages.SuccessfullOperation, null);
-            }
-            catch (Exception)
-            {
-
-                return new Response<Person>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
-            }
-        }
-
-        #endregion
-
-        #region [- FindByIdAsync(Guid id) -]
-
-        public async Task<IResponse<Person>> FindByIdAsync(Guid id)
-        {
-            try
-            {
-                var q = await _context.Person.FindAsync(id);
-                return new Response<Person>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, q);
             }
             catch (Exception)
             {
@@ -113,25 +79,37 @@ namespace OnlineShop.Models.Services.Repositories
         #endregion
 
         #region [- Select() -]
-
-        public async Task<IResponse<List<Person>>> Select()
+        public async Task<IResponse<Person>> Select(Person person)
         {
             try
             {
-                try
-                {
-                    var persons = await _context.Person.ToListAsync();
-                    return new Response<List<Person>>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, persons);
-                }
-                catch (Exception)
-                {
-                    return new Response<List<Person>>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
-                }
+                var responseValue = new Person();
+                responseValue = await _context.Person.FindAsync(person.Id);
+                return responseValue is null ?
+                     new Response<Person>(false, HttpStatusCode.UnprocessableContent, ResponseMessages.NullInput, null) :
+                     new Response<Person>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, responseValue);
             }
             catch (Exception)
             {
+                return new Response<Person>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
+            }
+        }
+        #endregion
 
-                throw;
+        #region [- SelectAll() -]
+
+        public async Task<IResponse<IEnumerable<Person>>> SelectAll()
+        {
+            try
+            {
+                var persons = await _context.Person.AsNoTracking().ToListAsync();
+                return persons is null ?
+                    new Response<IEnumerable<Person>>(false, HttpStatusCode.UnprocessableContent, ResponseMessages.NullInput, null) :
+                    new Response<IEnumerable<Person>>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, persons);
+            }
+            catch (Exception)
+            {
+                return new Response<IEnumerable<Person>>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
             }
         }
 
@@ -149,7 +127,7 @@ namespace OnlineShop.Models.Services.Repositories
                 }
                 _context.Person.Attach(obj);
                 _context.Entry(obj).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                await SaveChanges();
                 return new Response<Person>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, obj);
             }
             catch (Exception)

@@ -27,56 +27,24 @@ namespace OnlineShop.Models.Services.Repositories
         {
             try
             {
-                if (_context.Entry(obj).State == EntityState.Detached)
+                var existingProduct = await _context.Product.FindAsync(obj.Id);
+                if (existingProduct == null)
                 {
-                    _context.Product.Attach(obj);
+                    return new Response<Product>(false, HttpStatusCode.NotFound, ResponseMessages.NullInput, null);
                 }
-                _context.Remove(obj);
+
+                _context.Entry(existingProduct).State = EntityState.Detached;
+                _context.Product.Remove(existingProduct);
                 await SaveChanges();
-                return new Response<Product>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, obj);
+
+                return new Response<Product>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, existingProduct);
             }
             catch (Exception)
             {
-
                 return new Response<Product>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
             }
         }
 
-        #endregion
-
-        #region [- DeleteAsync(Guid Id)-]
-
-        public async Task<IResponse<Product>> DeleteAsync(Guid id)
-        {
-            try
-            {
-                var entityToDelete = _context.Product.Find(id);
-                _context.Remove(entityToDelete);
-                await SaveChanges();
-                return new Response<Product>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, null);
-            }
-            catch (Exception)
-            {
-
-                return new Response<Product>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
-            }
-        }
-        #endregion
-
-        #region [- FindByIdAsync(Guid id)-]
-        public async Task<IResponse<Product>> FindByIdAsync(Guid id)
-        {
-            try
-            {
-                var q = await _context.Product.FindAsync(id);
-                return new Response<Product>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, q);
-            }
-            catch (Exception)
-            {
-
-                return new Response<Product>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
-            }
-        }
         #endregion
 
         #region [- InsertAsync(Product obj)-]
@@ -111,18 +79,38 @@ namespace OnlineShop.Models.Services.Repositories
 
         #endregion
 
-        #region [- Select(Product obj)-]
-
-        public async Task<IResponse<List<Product>>> Select()
+        #region [- Select() -]
+        public async Task<IResponse<Product>> Select(Product Product)
         {
             try
             {
-                var products = await _context.Product.ToListAsync();
-                return new Response<List<Product>>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, products);
+                var responseValue = new Product();
+                responseValue = await _context.Product.FindAsync(Product.Id);
+                return responseValue is null ?
+                     new Response<Product>(false, HttpStatusCode.UnprocessableContent, ResponseMessages.NullInput, null) :
+                     new Response<Product>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, responseValue);
             }
             catch (Exception)
             {
-                return new Response<List<Product>>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
+                return new Response<Product>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
+            }
+        }
+        #endregion
+
+        #region [- SelectAll() -]
+
+        public async Task<IResponse<IEnumerable<Product>>> SelectAll()
+        {
+            try
+            {
+                var products = await _context.Product.AsNoTracking().ToListAsync();
+                return products is null ?
+                    new Response<IEnumerable<Product>>(false, HttpStatusCode.UnprocessableContent, ResponseMessages.NullInput, null) :
+                    new Response<IEnumerable<Product>>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, products);
+            }
+            catch (Exception)
+            {
+                return new Response<IEnumerable<Product>>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
             }
         }
 
@@ -140,7 +128,7 @@ namespace OnlineShop.Models.Services.Repositories
                 }
                 _context.Product.Attach(obj);
                 _context.Entry(obj).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                await SaveChanges();
                 return new Response<Product>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation,obj);
             }
             catch (Exception)

@@ -1,6 +1,6 @@
 ﻿namespace OnlineShop.ApplicationServices.Dtos.ProductDtos
 {
-    public class DeleteProductDto
+    public class DeleteProductServiceDto
     {
         public Guid Id { get; set; }
     }

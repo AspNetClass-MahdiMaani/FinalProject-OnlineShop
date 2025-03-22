@@ -1,4 +1,5 @@
 ﻿using OnlineShop.Frameworks;
+using OnlineShop.Models.DomainModels.OrderAggregates;
 
 namespace OnlineShop.Models.DomainModels.ProductAggregates
 {
@@ -8,5 +9,6 @@ namespace OnlineShop.Models.DomainModels.ProductAggregates
         public string? Title { get; set; }
         public decimal? UnitPrice { get; set; }
         public string? Description { get; set; }
+        public List<OrderDetail> OrderDetail { get; set; }
     }
 }

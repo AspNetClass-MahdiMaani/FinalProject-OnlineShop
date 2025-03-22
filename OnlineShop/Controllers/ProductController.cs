@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OnlineShop.ApplicationServices.Contracts;
+using OnlineShop.ApplicationServices.Dtos.PersonDtos;
 using OnlineShop.ApplicationServices.Dtos.ProductDtos;
-using OnlineShop.Models.DomainModels.ProductAggregates;
-using OnlineShop.Models.Services.Contracts;
+using OnlineShop.ApplicationServices.Services;
 
 namespace OnlineShop.Controllers
 {
@@ -9,77 +10,111 @@ namespace OnlineShop.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IProductService _productService;
 
         #region [- Ctor -]
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductService productService)
         {
-            _productRepository = productRepository;
+            _productService = productService;
+        }
+        #endregion
+
+        #region [- GetAll() -]
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            Guard_ProductService();
+            var getAllResponse = await _productService.GetAll();
+            var response = getAllResponse.Value.GetProductServiceDtos;
+            return new JsonResult(response);
         }
         #endregion
 
         #region [- Get() -]
-
-        [HttpGet(Name = "GetProducts")]
-        public async Task<IActionResult> Get()
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(Guid id)
         {
-            var products = _productRepository.Select().Result;
-            return new JsonResult(products);
+            Guard_ProductService();
+            var dto = new GetProductServiceDto() { Id = id };
+            var getResponse = await _productService.Get(dto);
+            var response = getResponse.Value;
+            if (response is null)
+            {
+                return new JsonResult("NotFound");
+            }
+            return new JsonResult(response);
         }
-
         #endregion
 
         #region [- Post() -]
-        [HttpPost(Name = "PostProduct")]
-        public async Task<IActionResult> Post(InsertProductDto insertProductDto)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] PostProductServiceDto dto)
         {
-            if (insertProductDto != null)
-            {
-                var product = new Product()
-                {
-                    Title = insertProductDto.Title,
-                    Description = insertProductDto.Description,
-                    UnitPrice = insertProductDto.UnitPrice,
-                };
-                await _productRepository.InsertAsync(product);
-            }
-            return Ok();
-        }
+            Guard_ProductService();
+            var postedDto = new GetProductServiceDto() { Title = dto.Title, UnitPrice = dto.UnitPrice, Description=dto.Description };
+            var getResponse = await _productService.Get(postedDto);
 
+            if (ModelState.IsValid && getResponse.Value is null)
+            {
+                var postResponse = await _productService.Post(dto);
+                return new JsonResult(postResponse);
+            }
+            else if (ModelState.IsValid && getResponse.Value is not null)
+            {
+                return Conflict(dto);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
         #endregion
 
         #region [- Put() -]
-        [HttpPut(Name = "PutProduct")]
-        public async Task<IActionResult> Put(UpdateProductDto updateProductDto)
-        {
-            if (updateProductDto != null)
-            {
-                var product = new Product()
-                {
-                    Id = updateProductDto.Id,
-                    Title = updateProductDto.Title,
-                    Description = updateProductDto.Description,
-                    UnitPrice = updateProductDto.UnitPrice,
-                };
-                await _productRepository.UpdateAsync(product);
-            }
 
-            return Ok();
+        [HttpPut]
+        public async Task<IActionResult> Put(PutProductServiceDto dto)
+        {
+            if (dto == null)
+            {
+                return BadRequest("Input is null");
+            }
+            Guard_ProductService();
+            var updateProduct = await _productService.Put(dto);
+            return new JsonResult(updateProduct);
         }
         #endregion
 
         #region [- Delete() -]
-
-        [HttpDelete(Name = "DeleteProduct")]
-        public async Task<IActionResult> Delete(DeleteProductDto deleteProductDto)
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromBody] DeleteProductServiceDto dto)
         {
-            if (deleteProductDto != null)
-            {
-                await _productRepository.DeleteAsync(deleteProductDto.Id);
-            }
-            return Ok();
-        }
+            Guard_ProductService();
 
+            var getDto = new GetProductServiceDto()
+            {
+                Id = dto.Id
+            };
+            var product = await _productService.Get(getDto); 
+            if (product == null)
+            {
+                return NotFound("Product not found");
+            }
+            var isDeleted = await _productService.Delete(dto); 
+            return NoContent(); 
+        }
+        #endregion
+
+        #region [- ProductServiceGuard() -]
+        private ObjectResult Guard_ProductService()
+        {
+            if (_productService is null)
+            {
+                return Problem($" {nameof(_productService)} is null.");
+            }
+
+            return null;
+        }
         #endregion
     }
 }

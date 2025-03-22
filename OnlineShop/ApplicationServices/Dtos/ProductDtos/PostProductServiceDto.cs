@@ -1,8 +1,7 @@
 ﻿namespace OnlineShop.ApplicationServices.Dtos.ProductDtos
 {
-    public class GetProductDto
+    public class PostProductServiceDto
     {
-        public Guid Id { get; set; }
         public string? Title { get; set; }
         public decimal? UnitPrice { get; set; }
         public string? Description { get; set; }

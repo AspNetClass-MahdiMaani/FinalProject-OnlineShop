@@ -2,7 +2,7 @@
 
 namespace OnlineShop.ApplicationServices.Dtos.PersonDtos
 {
-    public class InsertPersonDto
+    public class PostPersonServiceDto
     {
         [Required]
         public string FName { get; set; }

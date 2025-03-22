@@ -1,6 +1,6 @@
 ﻿namespace OnlineShop.ApplicationServices.Dtos.PersonDtos
 {
-    public class DeletePersonDto
+    public class DeletePersonServiceDto
     {
         public Guid Id { get; set; }
     }

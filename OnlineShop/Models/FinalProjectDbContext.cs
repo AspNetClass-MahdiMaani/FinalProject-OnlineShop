@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OnlineShop.Frameworks;
+using OnlineShop.Models.DomainModels.OrderAggregates;
 using OnlineShop.Models.DomainModels.personAggregates;
 using OnlineShop.Models.DomainModels.ProductAggregates;
 using System.Collections.Generic;
@@ -33,5 +34,7 @@ namespace OnlineShop.Models
 
         public DbSet<Product> Product { get; set; }
         public DbSet<Person> Person { get; set; }
+        public DbSet<OrderHeader> OrderHeader { get; set; }
+        public DbSet<OrderDetail> OrderDetail { get; set; }
     }
 }
