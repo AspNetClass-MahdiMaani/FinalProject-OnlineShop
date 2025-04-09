@@ -10,7 +10,6 @@ namespace OnlineShop.Models.Services.Contracts
         Task<IResponse<T>> InsertAsync(T obj);
         Task<IResponse<T>> UpdateAsync(T obj);
         Task<IResponse<T>> DeleteAsync(T obj);
-        //Task<IResponse<T>> DeleteAsync(Guid id);
         Task<IResponse<T>> Select(T obj);
         Task SaveChanges();
     }

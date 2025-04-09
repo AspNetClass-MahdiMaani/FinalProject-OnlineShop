@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OnlineShop.ApplicationServices.Contracts;
 using OnlineShop.ApplicationServices.Dtos.OrderDtos;
-using OnlineShop.ApplicationServices.Services;
 
 namespace OnlineShop.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
+    [ApiController]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -28,7 +27,7 @@ namespace OnlineShop.Controllers
             if (!result.IsSuccessful)
                 return StatusCode((int)result.Status, result.Message);
 
-            return Ok(result.Value);
+            return new JsonResult(result.Value);
         }
         #endregion
 
@@ -42,7 +41,7 @@ namespace OnlineShop.Controllers
             if (!result.IsSuccessful)
                 return StatusCode((int)result.Status, result.Message);
 
-            return Ok(result.Value);
+            return new JsonResult(result.Value);
         }
 
         #endregion
@@ -57,7 +56,7 @@ namespace OnlineShop.Controllers
             if (!result.IsSuccessful)
                 return StatusCode((int)result.Status, result.Message);
 
-            return CreatedAtAction(nameof(Get), new { id = result.Value }, result.Value);
+            return new JsonResult(result);
         }
 
         #endregion
@@ -75,7 +74,7 @@ namespace OnlineShop.Controllers
             if (!result.IsSuccessful)
                 return StatusCode((int)result.Status, result.Message);
 
-            return Ok(result.Value);
+            return new JsonResult(result.Value);
         }
 
         #endregion

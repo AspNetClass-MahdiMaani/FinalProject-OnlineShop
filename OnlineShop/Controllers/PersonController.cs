@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OnlineShop.ApplicationServices.Contracts;
 using OnlineShop.ApplicationServices.Dtos.PersonDtos;
-using OnlineShop.ApplicationServices.Dtos.ProductDtos;
-using OnlineShop.ApplicationServices.Services;
-using OnlineShop.Models.DomainModels.personAggregates;
 
 namespace OnlineShop.Controllers
 {

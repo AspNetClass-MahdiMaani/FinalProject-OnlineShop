@@ -3,6 +3,7 @@ using OnlineShop.Frameworks;
 using OnlineShop.Frameworks.ResponseFrameworks;
 using OnlineShop.Frameworks.ResponseFrameworks.Contracts;
 using OnlineShop.Models.DomainModels.OrderAggregates;
+using OnlineShop.Models.DomainModels.personAggregates;
 using OnlineShop.Models.Services.Contracts;
 using System.Net;
 
@@ -46,9 +47,41 @@ namespace OnlineShop.Models.Services.Repositories
         {
             try
             {
+                if (obj.Seller.Id == obj.Buyer.Id)
+                {
+                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest, ResponseMessages.Error, null);
+                }
+                var seller = await _context.Set<Person>().FindAsync(obj.Seller.Id);
+                if (seller != null)
+                {
+                    seller = new Person
+                    {
+                        Id = Guid.NewGuid(),
+                    };
+                    _context.Set<Person>().Add(seller);
+                }
+
+                var buyer = await _context.Set<Person>().FindAsync(obj.Buyer.Id);
+                if (buyer != null)
+                {
+                    buyer = new Person
+                    {
+                        Id = Guid.NewGuid(),
+                        //FName = obj.Buyer.FName,
+                        //LName = obj.Buyer.LName
+
+                        //FName = "DefaultSellerFirstName",
+                        //LName = "DefaultSellerLastName"  
+                    };
+                    _context.Set<Person>().Add(buyer);
+                }
+
+                obj.Seller = seller;
+                obj.Buyer = buyer;
+
                 _context.Set<OrderHeader>().Add(obj);
                 await SaveChanges();
-                return new Response<OrderHeader>(true, HttpStatusCode.Created, ResponseMessages.SuccessfullOperation, obj);
+                return new Response<OrderHeader>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, obj);
             }
             catch (Exception)
             {
@@ -142,7 +175,7 @@ namespace OnlineShop.Models.Services.Repositories
 
                 _context.Set<OrderHeader>().Remove(order);
                 await SaveChanges();
-                return new Response<OrderHeader>(true, HttpStatusCode.OK,ResponseMessages.SuccessfullOperation, order);
+                return new Response<OrderHeader>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, order);
             }
             catch (Exception)
             {

@@ -45,7 +45,7 @@ namespace OnlineShop.ApplicationServices.Services
             }
             catch (Exception)
             {
-                return new Response<DeleteOrderDto>(false, HttpStatusCode.InternalServerError,ResponseMessages.Error, null);
+                return new Response<DeleteOrderDto>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
             }
         }
 
@@ -118,45 +118,43 @@ namespace OnlineShop.ApplicationServices.Services
         #endregion
 
         #region [- Post() -]
-
         public async Task<IResponse<PostOrderDto>> Post(PostOrderDto dto)
         {
             try
             {
+                // insert person
+                var person = new Person
+                {
+                    Id = Guid.NewGuid(),
+                };
+                // if and else 
                 var orderHeader = new OrderHeader
                 {
                     Id = Guid.NewGuid(),
-                    Seller = new Person { Id = Guid.NewGuid() },
-                    Buyer = new Person { Id = Guid.NewGuid() },
+                    SallerId = new Person { Id = dto.SellerId },
+                    Buyer = new Person { Id = dto.BuyerId },
                     OrderDetail = new List<OrderDetail>
-                {
-                    new OrderDetail
                     {
-                        UnitPrice = dto.UnitPrice,
-                        Amount = dto.Amount,
-                        ProductId = Guid.NewGuid()
+                        new OrderDetail
+                        {
+                            UnitPrice = dto.UnitPrice,
+                            Amount = dto.Amount,
+                            ProductId = dto.ProductId
+                        }
                     }
-                }
                 };
 
                 var result = await _orderRepository.InsertAsync(orderHeader);
                 if (!result.IsSuccessful)
                     return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest, ResponseMessages.Error, null);
 
-                var responseDto = new PostOrderDto
-                {
-                    UnitPrice = dto.UnitPrice,
-                    Amount = dto.Amount
-                };
-
-                return new Response<PostOrderDto>(true, HttpStatusCode.Created, ResponseMessages.SuccessfullOperation, responseDto);
+                return new Response<PostOrderDto>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, dto);
             }
             catch (Exception)
             {
                 return new Response<PostOrderDto>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
             }
         }
-
         #endregion
 
         #region [- Put() -]
