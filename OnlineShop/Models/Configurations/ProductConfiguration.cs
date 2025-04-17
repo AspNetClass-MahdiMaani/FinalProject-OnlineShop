@@ -15,8 +15,8 @@ namespace OnlineShop.Models.Configurations
             builder.Property(p => p.UnitPrice).IsRequired().HasMaxLength(50);
             builder.Property(p => p.Description).IsRequired().HasMaxLength(50);
 
-            //builder.HasMany(p => p.OrderDetail) 
-            //             .WithOne(od => od.Product) 
+            //builder.HasMany(p => p.OrderDetail)
+            //             .WithOne(od => od.Product)
             //             .HasForeignKey(od => od.ProductId)
             //             .OnDelete(DeleteBehavior.NoAction);
 

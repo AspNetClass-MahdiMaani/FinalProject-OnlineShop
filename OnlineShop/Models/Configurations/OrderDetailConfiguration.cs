@@ -13,7 +13,7 @@ namespace OnlineShop.Models.Configurations
             builder.Property(od => od.Amount).IsRequired();
 
             builder.HasOne(oh => oh.OrderHeader)
-                   .WithMany(od => od.OrderDetail)
+                   .WithMany(od => od.OrderDetails)
                    .HasForeignKey(oh => oh.OrderHeaderId)
                    .OnDelete(DeleteBehavior.NoAction);
 

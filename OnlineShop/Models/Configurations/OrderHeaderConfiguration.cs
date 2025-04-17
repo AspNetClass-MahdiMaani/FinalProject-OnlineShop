@@ -8,21 +8,25 @@ namespace OnlineShop.Models.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderHeader> builder)
         {
-            builder.ToTable("OrderHeader");
             builder.HasKey(p => p.Id);
 
-            builder.HasOne(e => e.Seller) 
-              .WithMany()
-              .OnDelete(DeleteBehavior.NoAction);
+            // Seller Relationship
+            builder.HasOne(e => e.Seller)
+                  .WithMany()
+                  .HasForeignKey(e => e.SellerId)
+                  .OnDelete(DeleteBehavior.NoAction);
 
+            // Buyer Relationship
             builder.HasOne(e => e.Buyer)
-                   .WithMany() 
-                   .OnDelete(DeleteBehavior.NoAction);
+                  .WithMany()
+                  .HasForeignKey(e => e.BuyerId)
+                  .OnDelete(DeleteBehavior.NoAction);
 
-            //builder.HasMany(oh => oh.OrderDetail)
-            //       .WithOne(od => od.OrderHeader) 
-            //       .HasForeignKey(od => od.OrderHeaderId) 
-            //       .OnDelete(DeleteBehavior.NoAction);
+            // OrderDetails relationship
+            builder.HasMany(oh => oh.OrderDetails)
+                  .WithOne(od => od.OrderHeader)
+                  .HasForeignKey(od => od.OrderHeaderId)
+                  .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

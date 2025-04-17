@@ -5,6 +5,7 @@ using OnlineShop.Frameworks.ResponseFrameworks;
 using OnlineShop.Frameworks.ResponseFrameworks.Contracts;
 using OnlineShop.Models.DomainModels.OrderAggregates;
 using OnlineShop.Models.DomainModels.personAggregates;
+using OnlineShop.Models.DomainModels.ProductAggregates;
 using OnlineShop.Models.Services.Contracts;
 using System.Net;
 
@@ -68,8 +69,8 @@ namespace OnlineShop.ApplicationServices.Services
                 var result = new GetOrderDto
                 {
                     OrderHeaderId = order.Value.Id,
-                    UnitPrice = order.Value.OrderDetail?.Sum(od => od.UnitPrice) ?? 0,
-                    Amount = order.Value.OrderDetail?.Sum(od => od.Amount) ?? 0,
+                    UnitPrice = order.Value.OrderDetails?.Sum(od => od.UnitPrice) ?? 0,
+                    Amount = order.Value.OrderDetails?.Sum(od => od.Amount) ?? 0,
                     Seller = order.Value.Seller,
                     Buyer = order.Value.Buyer
                 };
@@ -97,8 +98,8 @@ namespace OnlineShop.ApplicationServices.Services
                 var orderDtos = orders.Value.Select(order => new GetOrderDto
                 {
                     OrderHeaderId = order.Id,
-                    UnitPrice = order.OrderDetail?.Sum(od => od.UnitPrice) ?? 0,
-                    Amount = order.OrderDetail?.Sum(od => od.Amount) ?? 0,
+                    UnitPrice = order.OrderDetails?.Sum(od => od.UnitPrice) ?? 0,
+                    Amount = order.OrderDetails?.Sum(od => od.Amount) ?? 0,
                     Seller = order.Seller,
                     Buyer = order.Buyer
                 }).ToList();
@@ -122,31 +123,30 @@ namespace OnlineShop.ApplicationServices.Services
         {
             try
             {
-                // insert person
-                var person = new Person
-                {
-                    Id = Guid.NewGuid(),
-                };
-                // if and else 
-                var orderHeader = new OrderHeader
-                {
-                    Id = Guid.NewGuid(),
-                    SallerId = new Person { Id = dto.SellerId },
-                    Buyer = new Person { Id = dto.BuyerId },
-                    OrderDetail = new List<OrderDetail>
-                    {
-                        new OrderDetail
-                        {
-                            UnitPrice = dto.UnitPrice,
-                            Amount = dto.Amount,
-                            ProductId = dto.ProductId
-                        }
-                    }
-                };
-
+                    // if (dto.SellerId == dto.BuyerId)
+                    //return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest, "Seller and Buyer cannot be the same", null);
+ 
+                // Create OrderHeader with proper Person references
+                var orderHeader = new OrderHeader
+                {
+                    Id = Guid.NewGuid(),
+                    Seller = new Person { Id = (Guid)dto.SellerId },
+                    Buyer = new Person { Id = (Guid)dto.BuyerId },
+                    OrderDetails = new List<OrderDetail>
+                    {
+                        new OrderDetail
+                        {
+                            UnitPrice = dto.UnitPrice,
+                            Amount = dto.Amount,
+                            ProductId = dto.ProductId
+                        }
+                    }
+                };
                 var result = await _orderRepository.InsertAsync(orderHeader);
                 if (!result.IsSuccessful)
-                    return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest, ResponseMessages.Error, null);
+                {
+                    return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest, result.Message, null);
+                }
 
                 return new Response<PostOrderDto>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, dto);
             }
@@ -171,7 +171,7 @@ namespace OnlineShop.ApplicationServices.Services
                 if (!existingOrder.IsSuccessful || existingOrder.Value == null)
                     return new Response<PutOrderDto>(false, HttpStatusCode.NotFound, ResponseMessages.Error, null);
 
-                existingOrder.Value.OrderDetail = new List<OrderDetail>
+                existingOrder.Value.OrderDetails = new List<OrderDetail>
             {
                 new OrderDetail
                 {

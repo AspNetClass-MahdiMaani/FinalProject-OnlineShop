@@ -29,7 +29,7 @@ namespace OnlineShop.Models.Services.Repositories
             try
             {
                 var orders = await _context.Set<OrderHeader>()
-                    .Include(o => o.OrderDetail)
+                    .Include(o => o.OrderDetails)
                     .ToListAsync();
                 return new Response<IEnumerable<OrderHeader>>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, orders);
             }
@@ -42,36 +42,40 @@ namespace OnlineShop.Models.Services.Repositories
         #endregion
 
         #region [- InsertAsync() -]
-
         public async Task<IResponse<OrderHeader>> InsertAsync(OrderHeader obj)
         {
             try
             {
-                if (obj.Seller.Id == obj.Buyer.Id)
+                if (obj.Seller == null || obj.Buyer == null)
                 {
-                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest, ResponseMessages.Error, null);
+                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest, "Seller or Buyer is null", null);
                 }
+
+                //if (obj.Seller.Id == obj.Buyer.Id)
+                //{
+                //    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest, "Seller and Buyer cannot be the same", null);
+                //}
+
                 var seller = await _context.Set<Person>().FindAsync(obj.Seller.Id);
-                if (seller != null)
+                if (seller == null)
                 {
                     seller = new Person
                     {
-                        Id = Guid.NewGuid(),
+                        Id = obj.Seller.Id,
+                        FName = obj.Seller.FName,
+                        LName = obj.Seller.LName
                     };
                     _context.Set<Person>().Add(seller);
                 }
 
                 var buyer = await _context.Set<Person>().FindAsync(obj.Buyer.Id);
-                if (buyer != null)
+                if (buyer == null)
                 {
                     buyer = new Person
                     {
-                        Id = Guid.NewGuid(),
-                        //FName = obj.Buyer.FName,
-                        //LName = obj.Buyer.LName
-
-                        //FName = "DefaultSellerFirstName",
-                        //LName = "DefaultSellerLastName"  
+                        Id = obj.Buyer.Id,
+                        FName = obj.Buyer.FName,
+                        LName = obj.Buyer.LName
                     };
                     _context.Set<Person>().Add(buyer);
                 }
@@ -81,14 +85,13 @@ namespace OnlineShop.Models.Services.Repositories
 
                 _context.Set<OrderHeader>().Add(obj);
                 await SaveChanges();
-                return new Response<OrderHeader>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, obj);
+                return new Response<OrderHeader>(true, HttpStatusCode.OK, "Order created successfully", obj);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return new Response<OrderHeader>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
+                return new Response<OrderHeader>(false, HttpStatusCode.InternalServerError, $"Error: {ex.Message}", null);
             }
         }
-
         #endregion
 
         #region [- UpdateAsync() -]
@@ -98,7 +101,7 @@ namespace OnlineShop.Models.Services.Repositories
             try
             {
                 var existingOrder = await _context.OrderHeader
-                    .Include(o => o.OrderDetail)
+                    .Include(o => o.OrderDetails)
                     .FirstOrDefaultAsync(o => o.Id == obj.Id);
 
                 if (existingOrder == null)
@@ -109,19 +112,19 @@ namespace OnlineShop.Models.Services.Repositories
                 existingOrder.Seller = obj.Seller;
                 existingOrder.Buyer = obj.Buyer;
 
-                var existingDetails = existingOrder.OrderDetail.ToList();
+                var existingDetails = existingOrder.OrderDetails.ToList();
                 foreach (var existingDetail in existingDetails)
                 {
-                    if (!obj.OrderDetail.Any(d =>
+                    if (!obj.OrderDetails.Any(d =>
                         d.OrderHeaderId == existingDetail.OrderHeaderId &&
                         d.ProductId == existingDetail.ProductId))
                     {
                         _context.Set<OrderDetail>().Remove(existingDetail);
                     }
                 }
-                foreach (var detail in obj.OrderDetail)
+                foreach (var detail in obj.OrderDetails)
                 {
-                    var existingDetail = existingOrder.OrderDetail
+                    var existingDetail = existingOrder.OrderDetails
                         .FirstOrDefault(d =>
                             d.OrderHeaderId == detail.OrderHeaderId &&
                             d.ProductId == detail.ProductId);
@@ -192,7 +195,7 @@ namespace OnlineShop.Models.Services.Repositories
             try
             {
                 var order = await _context.Set<OrderHeader>()
-                    .Include(o => o.OrderDetail)
+                    .Include(o => o.OrderDetails)
                     .FirstOrDefaultAsync(o => o.Id == obj.Id);
                 if (order == null)
                     return new Response<OrderHeader>(false, HttpStatusCode.UnprocessableContent, ResponseMessages.NullInput, null);

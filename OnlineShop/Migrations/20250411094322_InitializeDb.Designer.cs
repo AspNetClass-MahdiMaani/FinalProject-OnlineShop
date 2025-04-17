@@ -12,7 +12,7 @@ using OnlineShop.Models;
 namespace OnlineShop.Migrations
 {
     [DbContext(typeof(FinalProjectDbContext))]
-    [Migration("20250321121131_InitializeDb")]
+    [Migration("20250411094322_InitializeDb")]
     partial class InitializeDb
     {
         /// <inheritdoc />
@@ -64,7 +64,7 @@ namespace OnlineShop.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("OrderHeader", (string)null);
+                    b.ToTable("OrderHeader");
                 });
 
             modelBuilder.Entity("OnlineShop.Models.DomainModels.ProductAggregates.Product", b =>
@@ -116,7 +116,7 @@ namespace OnlineShop.Migrations
             modelBuilder.Entity("OnlineShop.Models.DomainModels.OrderAggregates.OrderDetail", b =>
                 {
                     b.HasOne("OnlineShop.Models.DomainModels.OrderAggregates.OrderHeader", "OrderHeader")
-                        .WithMany("OrderDetail")
+                        .WithMany("OrderDetails")
                         .HasForeignKey("OrderHeaderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -153,7 +153,7 @@ namespace OnlineShop.Migrations
 
             modelBuilder.Entity("OnlineShop.Models.DomainModels.OrderAggregates.OrderHeader", b =>
                 {
-                    b.Navigation("OrderDetail");
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("OnlineShop.Models.DomainModels.ProductAggregates.Product", b =>
