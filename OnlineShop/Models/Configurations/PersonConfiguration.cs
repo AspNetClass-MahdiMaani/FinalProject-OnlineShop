@@ -9,7 +9,6 @@ namespace OnlineShop.Models.Configurations
     {
         public void Configure(EntityTypeBuilder<Person> builder)
         {
-            builder.ToTable("Person");
             builder.HasKey(p => p.Id);
             builder.Property(p => p.FName).IsRequired().HasMaxLength(50);
             builder.Property(p => p.LName).IsRequired().HasMaxLength(50);

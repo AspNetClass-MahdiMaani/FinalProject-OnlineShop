@@ -19,7 +19,7 @@ namespace OnlineShop.Controllers
 
         #region [- GetAll() -]
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _orderService.GetAll();
@@ -63,10 +63,10 @@ namespace OnlineShop.Controllers
 
         #region [- Update() -]
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(Guid id, [FromBody] PutOrderDto dto)
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody] PutOrderDto dto)
         {
-            if (id != dto.OrderHeaderId)
+            if (dto.OrderHeaderId == null)
                 return BadRequest("OrderHeaderId in the URL does not match the one in the request body.");
 
             var result = await _orderService.Put(dto);

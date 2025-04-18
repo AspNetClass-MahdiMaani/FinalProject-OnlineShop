@@ -49,10 +49,10 @@ namespace OnlineShop.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BuyerId")
+                    b.Property<Guid?>("BuyerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SellerId")
+                    b.Property<Guid?>("SellerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -107,7 +107,7 @@ namespace OnlineShop.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Person", (string)null);
+                    b.ToTable("Person");
                 });
 
             modelBuilder.Entity("OnlineShop.Models.DomainModels.OrderAggregates.OrderDetail", b =>
@@ -134,14 +134,12 @@ namespace OnlineShop.Migrations
                     b.HasOne("OnlineShop.Models.DomainModels.personAggregates.Person", "Buyer")
                         .WithMany()
                         .HasForeignKey("BuyerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("OnlineShop.Models.DomainModels.personAggregates.Person", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Buyer");
 

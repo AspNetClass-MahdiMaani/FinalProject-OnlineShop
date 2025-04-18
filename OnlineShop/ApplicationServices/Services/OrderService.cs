@@ -4,8 +4,6 @@ using OnlineShop.Frameworks;
 using OnlineShop.Frameworks.ResponseFrameworks;
 using OnlineShop.Frameworks.ResponseFrameworks.Contracts;
 using OnlineShop.Models.DomainModels.OrderAggregates;
-using OnlineShop.Models.DomainModels.personAggregates;
-using OnlineShop.Models.DomainModels.ProductAggregates;
 using OnlineShop.Models.Services.Contracts;
 using System.Net;
 
@@ -71,8 +69,8 @@ namespace OnlineShop.ApplicationServices.Services
                     OrderHeaderId = order.Value.Id,
                     UnitPrice = order.Value.OrderDetails?.Sum(od => od.UnitPrice) ?? 0,
                     Amount = order.Value.OrderDetails?.Sum(od => od.Amount) ?? 0,
-                    Seller = order.Value.Seller,
-                    Buyer = order.Value.Buyer
+                    SellerId = order.Value.SellerId,
+                    BuyerId = order.Value.BuyerId
                 };
 
                 return new Response<GetOrderDto>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, result);
@@ -100,8 +98,8 @@ namespace OnlineShop.ApplicationServices.Services
                     OrderHeaderId = order.Id,
                     UnitPrice = order.OrderDetails?.Sum(od => od.UnitPrice) ?? 0,
                     Amount = order.OrderDetails?.Sum(od => od.Amount) ?? 0,
-                    Seller = order.Seller,
-                    Buyer = order.Buyer
+                    SellerId = order.SellerId,
+                    BuyerId = order.BuyerId
                 }).ToList();
 
                 var result = new GetAllOrderDto
@@ -109,7 +107,7 @@ namespace OnlineShop.ApplicationServices.Services
                     GetOrderDtos = orderDtos
                 };
 
-                return new Response<GetAllOrderDto>(true, HttpStatusCode.OK, "Orders retrieved successfully", result);
+                return new Response<GetAllOrderDto>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, result);
             }
             catch (Exception)
             {
@@ -119,54 +117,62 @@ namespace OnlineShop.ApplicationServices.Services
         #endregion
 
         #region [- Post() -]
+
         public async Task<IResponse<PostOrderDto>> Post(PostOrderDto dto)
         {
             try
             {
-                    // if (dto.SellerId == dto.BuyerId)
-                    //return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest, "Seller and Buyer cannot be the same", null);
- 
-                // Create OrderHeader with proper Person references
-                var orderHeader = new OrderHeader
-                {
-                    Id = Guid.NewGuid(),
-                    Seller = new Person { Id = (Guid)dto.SellerId },
-                    Buyer = new Person { Id = (Guid)dto.BuyerId },
-                    OrderDetails = new List<OrderDetail>
-                    {
-                        new OrderDetail
-                        {
-                            UnitPrice = dto.UnitPrice,
-                            Amount = dto.Amount,
-                            ProductId = dto.ProductId
-                        }
-                    }
-                };
+                if (dto.SellerId == dto.BuyerId)
+                {
+                    return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest,
+                        "Seller and Buyer cannot be the same", null);
+                }
+
+                var orderHeader = new OrderHeader
+                {
+                    Id = Guid.NewGuid(),
+                    SellerId = dto.SellerId,
+                    BuyerId = dto.BuyerId,
+                    OrderDetails = new List<OrderDetail>
+                    {
+                       new OrderDetail
+                       {
+                          UnitPrice = dto.UnitPrice,
+                          Amount = dto.Amount,
+                          ProductId = dto.ProductId
+                       }
+                    }
+                };
+
                 var result = await _orderRepository.InsertAsync(orderHeader);
                 if (!result.IsSuccessful)
                 {
-                    return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest, result.Message, null);
+                    return new Response<PostOrderDto>(false, HttpStatusCode.BadRequest,
+                        result.Message, null);
                 }
 
-                return new Response<PostOrderDto>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, dto);
+                return new Response<PostOrderDto>(true, HttpStatusCode.OK,
+                    ResponseMessages.SuccessfullOperation, dto);
             }
             catch (Exception)
             {
-                return new Response<PostOrderDto>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
+                return new Response<PostOrderDto>(false, HttpStatusCode.InternalServerError,
+                    ResponseMessages.Error, null);
             }
         }
         #endregion
 
         #region [- Put() -]
-
         public async Task<IResponse<PutOrderDto>> Put(PutOrderDto dto)
         {
             try
             {
                 if (dto.OrderHeaderId == null)
+                {
                     return new Response<PutOrderDto>(false, HttpStatusCode.BadRequest, ResponseMessages.NullInput, null);
+                }
 
-                var existingOrder = await _orderRepository.Select(new OrderHeader { Id = dto.OrderHeaderId.Value });
+                var existingOrder = await _orderRepository.Select(new OrderHeader { Id = dto.OrderHeaderId });
 
                 if (!existingOrder.IsSuccessful || existingOrder.Value == null)
                     return new Response<PutOrderDto>(false, HttpStatusCode.NotFound, ResponseMessages.Error, null);
@@ -177,7 +183,7 @@ namespace OnlineShop.ApplicationServices.Services
                 {
                     UnitPrice = dto.UnitPrice,
                     Amount = dto.Amount,
-                    ProductId = Guid.NewGuid()
+                    ProductId = dto.ProductId
                 }
             };
 
@@ -188,6 +194,7 @@ namespace OnlineShop.ApplicationServices.Services
                 var responseDto = new PutOrderDto
                 {
                     OrderHeaderId = dto.OrderHeaderId,
+                    ProductId = dto.ProductId,
                     UnitPrice = dto.UnitPrice,
                     Amount = dto.Amount
                 };
@@ -199,7 +206,6 @@ namespace OnlineShop.ApplicationServices.Services
                 return new Response<PutOrderDto>(false, HttpStatusCode.InternalServerError, ResponseMessages.Error, null);
             }
         }
-
         #endregion
     }
 }

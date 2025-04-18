@@ -46,38 +46,30 @@ namespace OnlineShop.Models.Services.Repositories
         {
             try
             {
-                if (obj.Seller == null || obj.Buyer == null)
+                if (obj.SellerId == default || obj.BuyerId == default)
                 {
-                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest, "Seller or Buyer is null", null);
+                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest,
+                        "Seller or Buyer ID is missing", null);
                 }
 
-                //if (obj.Seller.Id == obj.Buyer.Id)
-                //{
-                //    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest, "Seller and Buyer cannot be the same", null);
-                //}
+                if (obj.SellerId == obj.BuyerId)
+                {
+                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest,
+                        "Seller and Buyer cannot be the same", null);
+                }
 
-                var seller = await _context.Set<Person>().FindAsync(obj.Seller.Id);
+                var seller = await _context.Set<Person>().FindAsync(obj.SellerId);
                 if (seller == null)
                 {
-                    seller = new Person
-                    {
-                        Id = obj.Seller.Id,
-                        FName = obj.Seller.FName,
-                        LName = obj.Seller.LName
-                    };
-                    _context.Set<Person>().Add(seller);
+                    return new Response<OrderHeader>(false, HttpStatusCode.NotFound,
+                        "Seller not found", null);
                 }
 
-                var buyer = await _context.Set<Person>().FindAsync(obj.Buyer.Id);
+                var buyer = await _context.Set<Person>().FindAsync(obj.BuyerId);
                 if (buyer == null)
                 {
-                    buyer = new Person
-                    {
-                        Id = obj.Buyer.Id,
-                        FName = obj.Buyer.FName,
-                        LName = obj.Buyer.LName
-                    };
-                    _context.Set<Person>().Add(buyer);
+                    return new Response<OrderHeader>(false, HttpStatusCode.NotFound,
+                        "Buyer not found", null);
                 }
 
                 obj.Seller = seller;
@@ -85,11 +77,14 @@ namespace OnlineShop.Models.Services.Repositories
 
                 _context.Set<OrderHeader>().Add(obj);
                 await SaveChanges();
-                return new Response<OrderHeader>(true, HttpStatusCode.OK, "Order created successfully", obj);
+
+                return new Response<OrderHeader>(true, HttpStatusCode.OK,
+                    ResponseMessages.SuccessfullOperation, obj);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Response<OrderHeader>(false, HttpStatusCode.InternalServerError, $"Error: {ex.Message}", null);
+                return new Response<OrderHeader>(false, HttpStatusCode.InternalServerError,
+                    ResponseMessages.Error, null);
             }
         }
         #endregion
@@ -100,6 +95,11 @@ namespace OnlineShop.Models.Services.Repositories
         {
             try
             {
+                if (obj.SellerId == default || obj.BuyerId == default)
+                {
+                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest,
+                        "Seller or Buyer ID is missing", null);
+                }
                 var existingOrder = await _context.OrderHeader
                     .Include(o => o.OrderDetails)
                     .FirstOrDefaultAsync(o => o.Id == obj.Id);
@@ -138,6 +138,7 @@ namespace OnlineShop.Models.Services.Repositories
                         _context.Set<OrderDetail>().Add(detail);
                     }
                 }
+                await SaveChanges();
                 return new Response<OrderHeader>(true, HttpStatusCode.OK, ResponseMessages.SuccessfullOperation, obj);
             }
             catch (Exception)
